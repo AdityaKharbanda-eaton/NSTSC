@@ -1,14 +1,31 @@
 import pickle
-
-# Load the learned tree
-with open("Meat learned_tree.pkl", "rb") as f:
-    Tree = pickle.load(f)
-
-# Retrieve the bestmodel from each node (if available)
-best_models = {}
-for node_idx, node in Tree.items():
-    if hasattr(node, 'bestmodel'):
-        best_models[node_idx] = node.bestmodel
-        print(f"Node {node_idx} best model: {node.bestmodel}")
+import os
+import sys
+def load_model():
+    #Default value for Dataset_name
+    Dataset_name = "Coffee"
+    if len(sys.argv) > 1:
+        Dataset_name = sys.argv[1]
     else:
-        print(f"Node {node_idx} does not have a bestmodel attribute.")
+        print("No Dataset_name provided. Using default value: 'Coffee'")
+
+    # Load the learned tree
+    file_path = os.path.join("../Tree_Models", f"{Dataset_name}_learned_tree.pkl")
+    if not os.path.exists(file_path):
+        print(f"Error: File '{file_path}' not found.")
+        return
+    print(f"Looking for file: {file_path}")
+    with open(file_path, "rb") as f:
+        Tree = pickle.load(f)
+
+    # Retrieve the bestmodel from each node (if available)
+    best_models = {}
+    for node_idx, node in Tree.items():
+        if hasattr(node, 'bestmodel'):
+            best_models[node_idx] = node.bestmodel
+            print(f"Node {node_idx} best model: {node.bestmodel}")
+        else:
+            print(f"Node {node_idx} does not have a bestmodel attribute.")
+
+if __name__ == "__main__":
+    load_model()
