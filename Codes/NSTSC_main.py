@@ -28,6 +28,8 @@ def main():
     Tree = Train_model(Xtrain, Xval, ytrain_raw, yval_raw, epochs=Max_epoch, normalize_timeseries=normalize_dataset)
     # Save the learned tree to a file in the Tree_Models folder
     output_path = f"Tree_Models/{Dataset_name}_learned_tree.pkl"
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
     with open(output_path, "wb") as f:
         pickle.dump(Tree, f)
     # model testing
