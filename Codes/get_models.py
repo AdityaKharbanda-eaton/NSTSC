@@ -26,6 +26,19 @@ def load_model():
             print(f"Node {node_idx} best model: {node.bestmodel}")
         else:
             print(f"Node {node_idx} does not have a bestmodel attribute.")
+        if hasattr(node, 'predcls'):
+            print(f"Node {node_idx} predcls: {node.predcls}")
+        else:
+            print(f"Node {node_idx} does not have a predcls attribute")
+        if hasattr(node, 'bstmdlclass'):
+            print(f"Node {node_idx} bstmdlclass: {node.bstmdlclass}")
+        else:
+            print(f"Node {node_idx} does not have a bstmdlclass attribute")
+        if hasattr(node, 'prntnb'):
+            best_models[node_idx] = node.prntnb
+            print(f"Node {node_idx} best model: {node.bestmodel}")
+        else:
+            print(f"Node {node_idx} does not have a bestmodel attribute.")
 
 if __name__ == "__main__":
     load_model()
