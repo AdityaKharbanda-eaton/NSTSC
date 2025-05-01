@@ -36,7 +36,7 @@ def load_model():
             print(f"Node {node_idx} does not have a bstmdlclass attribute")
         if hasattr(node, 'prntnb'):
             best_models[node_idx] = node.prntnb
-            print(f"Node {node_idx} best model: {node.bestmodel}")
+            print(f"Node {node_idx} best model: {node.prntnb}")
         else:
             print(f"Node {node_idx} does not have a bestmodel attribute.")
 
