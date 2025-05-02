@@ -457,7 +457,7 @@ def Prune_tree(Tree, Xval, yval):
     """
     Xpredclass, tstaccu, accuuptobst, keep_list = Postprune(Tree, Xval, yval)
     Tree_pruned = {}
-    
+    total_nodes_before = len(Tree.keys())
     for node_idx in Tree.keys():
         if node_idx in keep_list:
             Tree_pruned[node_idx] = Tree[node_idx]
@@ -469,6 +469,10 @@ def Prune_tree(Tree, Xval, yval):
                 if hasattr(Tree_pruned[node_idx], "rightchd"):
                     del Tree_pruned[node_idx].rightchd
                 
+    total_nodes_after = len(Tree_pruned.keys())
+    print(f"Total nodes before pruning: {total_nodes_before}")
+    print(f"Total nodes after pruning: {total_nodes_after}")
+    # print(f"Test accuracy after pruning: {tstaccu}")
     return Tree_pruned
 
 
