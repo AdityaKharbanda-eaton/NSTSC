@@ -29,7 +29,7 @@ def Shuffle(X, y):
 
 
 # Load Dataset given a dataset's path
-def Readdataset(dataset_path_, Dataset_name, standalize=True, val=False):
+def Readdataset(dataset_path_, Dataset_name, standalize=True, val=False, shuffle = True):
     # print("Running Readdataset")
     """
     @brief Load and preprocess dataset from the given path.
@@ -47,8 +47,9 @@ def Readdataset(dataset_path_, Dataset_name, standalize=True, val=False):
     ytest = Xtest[:,0]
     Xtrain = Xtrain[:,1:]
     Xtest = Xtest[:,1:]
-    Xtrain, ytrain = Shuffle(Xtrain, ytrain)
-    Xtest, ytest = Shuffle(Xtest, ytest)
+    if shuffle:
+        Xtrain, ytrain = Shuffle(Xtrain, ytrain)
+        Xtest, ytest = Shuffle(Xtest, ytest)
 
     #fixing the data leakage issue, commented the earlier approach of standardizing data below
     Xtrain_fft = np.fft.fft(Xtrain)
