@@ -10,6 +10,7 @@ from utils.train_utils import *
 import pickle
 import sys
 import time
+import os
 
 def main():
     """
@@ -30,15 +31,22 @@ def main():
     Xtrain, ytrain, Xval, yval, Xtest, ytest = Readdataset(dataset_path_, Dataset_name)
     N, T = calculate_dataset_metrics(Xtrain)
     end_time = time.time()
+    export_file_path = f"../Preprocessed_data/{Dataset_name}_data.pkl"
+    # Create directory if it doesn't exist
+    directory = os.path.dirname(export_file_path)
+    os.makedirs(directory, exist_ok=True)
+    with open(export_file_path, "wb") as data_file:
+        pickle.dump((Xtrain, ytrain, Xval, yval, Xtest, ytest, N, T), data_file)
+    print(f"Preprocessed data saved to {export_file_path}")
     print("Preprocessing time: {:.2f} seconds".format(end_time - start_time))
     # Tree = Train_model(Xtrain, Xval, ytrain_raw, yval_raw, epochs=Max_epoch, normalize_timeseries=normalize_dataset)
     training_start_time = time.time()
     Tree = Train_model(Xtrain, Xval, ytrain, yval, epochs=Max_epoch, normalize_timeseries=normalize_dataset)
     training_end_time = time.time()
     print("Training time: {:.2f} seconds".format(training_end_time - training_start_time))
-    with open(f"../Tree_Models/{Dataset_name}_model.pkl", "wb") as model_file:
+    with open(f"../Tree_Models/{Dataset_name}_learned_tree.pkl", "wb") as model_file:
         pickle.dump(Tree, model_file)
-        print(f"Model saved to ../Tree_Models/{Dataset_name}_model.pkl")
+        print(f"Model saved to ../Tree_Models/{Dataset_name}_learned_tree.pkl")
     # model testing
     # testaccu = Evaluate_model(Tree, Xtest, ytest_raw)
     testing_start_time = time.time()
