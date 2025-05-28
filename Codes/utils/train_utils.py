@@ -161,7 +161,7 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
     if batch_size <= 1:
         batch_size = N
         
-    for mdlnum in range(1, Mdlnum):
+    for mdlnum in range(3, Mdlnum): #change range to 3, 4 for TL_NN3 and TL_NN4
         tlnns = {}
         optimizers = {}
         X_rns = {}
