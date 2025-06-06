@@ -153,11 +153,12 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
     yori = np.array(yori)
     yori = torch.LongTensor(yori)
     yorit = torch.LongTensor(yorit)
-    N, T = len(yori), int(Xori.shape[1]/3)
+    # N, T = len(yori), int(Xori.shape[1]/3)
+    N, T = len(yori), 614 # hardcoded 614 for Peak Valley dataset
     ginibest = 10
     Xori = torch.Tensor(Xori)
     Xorit = torch.Tensor(Xorit)
-    batch_size = N // 20
+    batch_size = N // 50 # changed batch size to 50 for larger datasets
     if batch_size <= 1:
         batch_size = N
         
@@ -185,8 +186,9 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
                     y_batch = ytrain[rand_idx]
                     w_batch = IR * (1-y_batch) 
                     w_batch[w_batch==0] = 1
-                    X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:2*T],\
-                                          X_batch[:,2*T:])
+                    # X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:2*T],\
+                    #                       X_batch[:,2*T:])
+                    X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:T+10], X_batch[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
                     Losses[Ci] =  torch.sum(w_batch * (-y_batch * \
                                   torch.log(X_rns[Ci] + 1e-9) - (1-y_batch) * \
                                   torch.log(1-X_rns[Ci] + 1e-9)))
@@ -338,7 +340,8 @@ def Cptginisplit(mds, X, y, T, clsnum):
     """
     ginis = []
     for md in mds.values():
-        Xmd_preds = md(X[:,:T], X[:,T:2*T], X[:,2*T:])
+        # Xmd_preds = md(X[:,:T], X[:,T:2*T], X[:,2*T:])
+        Xmd_preds = md(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
         Xmd_predsrd = torch.round(Xmd_preds)
         onesnum = torch.sum(Xmd_predsrd == 1.)
         ygroup1 = y[Xmd_predsrd == 1.]
@@ -405,7 +408,8 @@ def Cpt_Accuracy(mdl, X, y, T):
     @param T: Number of time steps.
     @return Accuracy score.
     """
-    Xpreds = mdl(X[:,:T], X[:,T:2*T], X[:,2*T:])
+    # Xpreds = mdl(X[:,:T], X[:,T:2*T], X[:,2*T:])
+    Xpreds = mdl(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
     Xpredsnp = Xpreds.detach().numpy()
     Xpnprd = np.round(Xpredsnp)
     trueidx = np.where(Xpnprd == 1)[0]
@@ -465,7 +469,8 @@ def Postprune(Nodes, Xtestori, ytestori):
     @return Pruned tree.
     """
     Xtestori = torch.Tensor(Xtestori)
-    T = int(Xtestori.shape[1]/3)
+    # T = int(Xtestori.shape[1]/3)
+    T = 614 # hardcoded 614 for Peak Valley dataset
     Nodes[0].Testidx = list(range(len(ytestori))) 
     Xpredclass = np.zeros(ytestori.shape)
     testnode = 0
@@ -479,8 +484,9 @@ def Postprune(Nodes, Xtestori, ytestori):
             Xtest = Variable(Xtestori[testidx,:]).to(device)
             ytest = Variable(torch.Tensor((ytestori[testidx]))).to(device)
             
-            Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T],\
-                            Xtest[:,T:2*T], Xtest[:, 2*T:]).cpu()
+            # Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T],\
+            #                 Xtest[:,T:2*T], Xtest[:, 2*T:]).cpu()
+            Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T], Xtest[:,T:T+10], Xtest[:, T+10:]).cpu() # hardcoded T + 10 for Peak Valley dataset
             Predsnp = Preds_testnode.detach().numpy()
             Xpred, accutest, trueidx, falseidx = Cpt_Accuracy(Nodes[testnode].bestmodel,\
                             Xtest, ytest.cpu(), T)
@@ -528,7 +534,8 @@ def Evaluate_model(Nodes, Xtestori, ytestori):
     """
     Xtestori = torch.Tensor(Xtestori)
     clsnum = max(ytestori) + 1
-    T = int(Xtestori.shape[1]/3)
+    # T = int(Xtestori.shape[1]/3)
+    T = 614 # hardcoded 614 for Peak Valley dataset
     Nodes[0].Testidx = list(range(len(ytestori))) 
     Xpredclass = np.zeros(ytestori.shape)
     testnode = 0

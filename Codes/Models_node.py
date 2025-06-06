@@ -172,7 +172,8 @@ class TL_NN3(nn.Module):
         self.b2 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         self.b3 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         self.A1 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
+        # self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
+        self.A2 = torch.nn.Parameter(torch.rand(1,10),requires_grad=True) # changed to 10 for Peak Valley data
         self.A3 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
         self.A4 = torch.nn.Parameter(torch.rand(1,3),requires_grad=True)
         self.beta1 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
@@ -238,7 +239,8 @@ class TL_NN4(nn.Module):
         self.b2 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         self.b3 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         self.A1 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
+        # self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
+        self.A2 = torch.nn.Parameter(torch.rand(1,10),requires_grad=True) # changed to 10 for Peak Valley data
         self.A3 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
         self.A4 = torch.nn.Parameter(torch.rand(1,3),requires_grad=True)
         self.beta1 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
