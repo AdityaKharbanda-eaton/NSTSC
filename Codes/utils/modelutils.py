@@ -341,7 +341,7 @@ def extract_key_features(model, view_names=["Original", "FFT", "Derivative"]):
     # For each view, identify top K features by weight
     for view_name in view_names:
         weights = key_features[view_name]["A"]
-        top_indices = np.argsort(weights.flatten())[-5:]  # top 5 features
+        top_indices = np.argsort(weights.flatten())[-20:]  # top 10 features
         key_features[view_name]["top_indices"] = top_indices
     
     return key_features

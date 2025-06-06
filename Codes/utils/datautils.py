@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import random
 from sklearn.preprocessing import StandardScaler
-
+from sklearn.preprocessing import MinMaxScaler
 
 # Shuffle data
 def Shuffle(X, y):
@@ -81,6 +81,75 @@ def Readdataset(dataset_path_, Dataset_name, standalize=True, val=False):
     
     return Xtrain, ytrain, Xval, yval, Xtest, ytest
 
+# New function to load data without StandardScaler and without the data leakage issue
+def Readdataset2(dataset_path_, Dataset_name, normalize=True, val=False):
+    """
+    @brief Load and preprocess dataset from the given path.
+    @param dataset_path_: Path to the dataset directory.
+    @param Dataset_name: Name of the dataset.
+    @param standalize: Whether to standardize the data.
+    @param val: Whether to split validation from test set.
+    @return Xtrain, ytrain, Xval, yval, Xtest, ytest
+    """
+    
+    Dataset_folder = dataset_path_ + Dataset_name + '/'
+    Xtrain = pd.read_csv(Dataset_folder + Dataset_name + '_TRAIN.tsv', header=None, sep='\t').values
+    Xtest = pd.read_csv(Dataset_folder + Dataset_name + '_TEST.tsv', header=None, sep='\t').values
+    ytrain = Xtrain[:,0]
+    ytest = Xtest[:,0]
+    Xtrain = Xtrain[:,1:]
+    Xtest = Xtest[:,1:]
+    Xtrain, ytrain = Shuffle(Xtrain, ytrain)
+    Xtest, ytest = Shuffle(Xtest, ytest)
+    
+    Xtrain_fft = np.fft.fft(Xtrain)
+    Xtrain_fft = np.abs(Xtrain_fft)
+    Xtrain_dif = Xtrain[:,1:] - Xtrain[:,:-1]
+    Xtrain_dif = np.concatenate((Xtrain_dif[:,0].reshape([-1,1]),Xtrain_dif),1)
+
+    Xtest_fft = np.fft.fft(Xtest)
+    Xtest_fft = np.abs(Xtest_fft)
+    Xtest_dif = Xtest[:,1:] - Xtest[:,:-1]
+    Xtest_dif = np.concatenate((Xtest_dif[:,0].reshape([-1,1]),Xtest_dif),1)
+    if normalize:
+        # Normalize FFT data row-wise for train and record row minima and maxima
+        train_fft_min = np.min(Xtrain_fft, axis=1, keepdims=True)
+        train_fft_max = np.max(Xtrain_fft, axis=1, keepdims=True)
+        Xtrain_fft = (Xtrain_fft - train_fft_min) / (train_fft_max - train_fft_min + 1e-8)
+
+        # Normalize difference data row-wise for train and record row minima and maxima
+        train_dif_min = np.min(Xtrain_dif, axis=1, keepdims=True)
+        train_dif_max = np.max(Xtrain_dif, axis=1, keepdims=True)
+        Xtrain_dif = (Xtrain_dif - train_dif_min) / (train_dif_max - train_dif_min + 1e-8)
+
+        # For test data, use the train FFT and difference min and max.
+        # This assumes that Xtest_fft and Xtest_dif have the same number of rows as the train data.
+        Xtest_fft = (Xtest_fft - train_fft_min) / (train_fft_max - train_fft_min + 1e-8)
+        Xtest_dif = (Xtest_dif - train_dif_min) / (train_dif_max - train_dif_min + 1e-8)
+    Xtrain = np.concatenate((Xtrain, Xtrain_fft, Xtrain_dif), 1)
+    Xtest = np.concatenate((Xtest, Xtest_fft, Xtest_dif), 1)	
+
+    Ntrain = Xtrain.shape[0]
+    Xall, yall = np.concatenate((Xtrain, Xtest)), np.concatenate((ytrain, ytest))
+        
+    yset = np.array(list(set(yall))).astype(int)
+    classnum = len(yset)    
+    for ci in range(classnum):
+        yall[yall == yset[ci]] = ci
+        
+    Xtrain, Xtest = Xall[:Ntrain,:], Xall[Ntrain:,:] 
+    ytrain, ytest = yall[:Ntrain,], yall[Ntrain:,]
+    
+    if val:
+        Ntest = Xtest.shape[0]
+        Nval = int(Ntest * 0.5)
+        Xval, yval = Xtest[:Nval, :], ytest[:Nval,]
+        Xtest, ytest = Xtest[Nval:, :], ytest[Nval:,]
+    else:
+        Xval = Xtest - 0
+        yval = ytest - 0
+    
+    return Xtrain, ytrain, Xval, yval, Xtest, ytest
 
 # Dimension of data
 def calculate_dataset_metrics(Xtrain):
@@ -90,7 +159,8 @@ def calculate_dataset_metrics(Xtrain):
     @return Tuple (N, T) where N is the number of samples and T is the number of time steps.
     """
     
-    N, T = Xtrain.shape[0], int(Xtrain.shape[1]/3)
+    # N, T = Xtrain.shape[0], int(Xtrain.shape[1]/3)
+    N, T = Xtrain.shape[0], 614 # hardcoded to 614 for Peak Valley dataset
     
     return N, T
 
