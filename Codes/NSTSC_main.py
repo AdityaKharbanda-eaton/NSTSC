@@ -17,9 +17,9 @@ def main():
     @brief Main function to train and evaluate the NSTSC model.
     """
     # sys .argv = ["NSTSC_main.py", "SanityCheck", "5"] #-> for debugging purposes
-    # if len(sys.argv) < 3:
-    #     print("Usage: python NSTSC_main.py <Dataset_name> <Max_epoch>")
-    #     sys.exit(1)
+    if len(sys.argv) < 3:
+        print("Usage: python NSTSC_main.py <Dataset_name> <Max_epoch>")
+        sys.exit(1)
     Dataset_name = sys.argv[1] #-> "SanityCheck" #-> for debugging purposes
     Max_epoch = int(sys.argv[2]) #int(sys.argv[2])
     # print("Start Training ---" + str(Dataset_name) + " ---dataset\n")

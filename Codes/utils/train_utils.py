@@ -207,9 +207,9 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
                     ginisall.append(ginismin)
                     if ginismin < ginibest:
                         # Ensure path ends with separator
-                        save_path = os.path.join(mdlpath, 'bestmodel.pkl')
-                        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                        torch.save(tlnns[curclasses[ginisminnum]], save_path)
+                        # save_path = os.path.join(mdlpath, 'bestmodel.pkl')
+                        # os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                        torch.save(tlnns[curclasses[ginisminnum]],mdlpath + 'bestmodel.pkl')
                         # Nodes[pronum].predcls = ginisminnum
                         Nodes[pronum].ginis = ginismin
                         ginibest = ginismin
