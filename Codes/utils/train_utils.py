@@ -6,12 +6,12 @@
 Created on Tue Oct 11 10:30:37 2022
 @author: yanru
 """
-
+import os
 import numpy as np
 import torch
 from torch.autograd import Variable
 from sklearn.metrics import accuracy_score
-from Models_node import *
+from Models_node_copy import *
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -154,7 +154,8 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
     yori = torch.LongTensor(yori)
     yorit = torch.LongTensor(yorit)
     # N, T = len(yori), int(Xori.shape[1]/3)
-    N, T = len(yori), 614 # hardcoded 614 for Peak Valley dataset
+    # N, T = len(yori), 614 # hardcoded 614 for Peak Valley dataset
+    N,T = Xori.shape # when passing single view data
     ginibest = 10
     Xori = torch.Tensor(Xori)
     Xorit = torch.Tensor(Xorit)
@@ -162,7 +163,7 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
     if batch_size <= 1:
         batch_size = N
         
-    for mdlnum in range(3, Mdlnum): #change range to 3, 4 for TL_NN3 and TL_NN4
+    for mdlnum in range(1, Mdlnum): #change range to 1, 5 for TL_NN1,2,3,4
         tlnns = {}
         optimizers = {}
         X_rns = {}
@@ -188,7 +189,8 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
                     w_batch[w_batch==0] = 1
                     # X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:2*T],\
                     #                       X_batch[:,2*T:])
-                    X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:T+10], X_batch[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
+                    # X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:T+10], X_batch[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
+                    X_rns[Ci] = tlnns[Ci](X_batch) # when passing single view data
                     Losses[Ci] =  torch.sum(w_batch * (-y_batch * \
                                   torch.log(X_rns[Ci] + 1e-9) - (1-y_batch) * \
                                   torch.log(1-X_rns[Ci] + 1e-9)))
@@ -204,7 +206,10 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
                     ginismin = giniscores.min()
                     ginisall.append(ginismin)
                     if ginismin < ginibest:
-                        torch.save(tlnns[curclasses[ginisminnum]], mdlpath + 'bestmodel.pkl')
+                        # Ensure path ends with separator
+                        save_path = os.path.join(mdlpath, 'bestmodel.pkl')
+                        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                        torch.save(tlnns[curclasses[ginisminnum]], save_path)
                         # Nodes[pronum].predcls = ginisminnum
                         Nodes[pronum].ginis = ginismin
                         ginibest = ginismin
@@ -341,7 +346,8 @@ def Cptginisplit(mds, X, y, T, clsnum):
     ginis = []
     for md in mds.values():
         # Xmd_preds = md(X[:,:T], X[:,T:2*T], X[:,2*T:])
-        Xmd_preds = md(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
+        # Xmd_preds = md(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
+        Xmd_preds = md(X) # when passing single view data
         Xmd_predsrd = torch.round(Xmd_preds)
         onesnum = torch.sum(Xmd_predsrd == 1.)
         ygroup1 = y[Xmd_predsrd == 1.]
@@ -409,7 +415,8 @@ def Cpt_Accuracy(mdl, X, y, T):
     @return Accuracy score.
     """
     # Xpreds = mdl(X[:,:T], X[:,T:2*T], X[:,2*T:])
-    Xpreds = mdl(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
+    # Xpreds = mdl(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
+    Xpreds = mdl(X) # when passing single view data
     Xpredsnp = Xpreds.detach().numpy()
     Xpnprd = np.round(Xpredsnp)
     trueidx = np.where(Xpnprd == 1)[0]
@@ -470,7 +477,8 @@ def Postprune(Nodes, Xtestori, ytestori):
     """
     Xtestori = torch.Tensor(Xtestori)
     # T = int(Xtestori.shape[1]/3)
-    T = 614 # hardcoded 614 for Peak Valley dataset
+    # T = 614 # hardcoded 614 for Peak Valley dataset
+    T = Xtestori.shape[1] # when passing single view data
     Nodes[0].Testidx = list(range(len(ytestori))) 
     Xpredclass = np.zeros(ytestori.shape)
     testnode = 0
@@ -486,7 +494,8 @@ def Postprune(Nodes, Xtestori, ytestori):
             
             # Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T],\
             #                 Xtest[:,T:2*T], Xtest[:, 2*T:]).cpu()
-            Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T], Xtest[:,T:T+10], Xtest[:, T+10:]).cpu() # hardcoded T + 10 for Peak Valley dataset
+            # Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T], Xtest[:,T:T+10], Xtest[:, T+10:]).cpu() # hardcoded T + 10 for Peak Valley dataset
+            Preds_testnode = Nodes[testnode].bestmodel(Xtest).cpu() # when passing single view data
             Predsnp = Preds_testnode.detach().numpy()
             Xpred, accutest, trueidx, falseidx = Cpt_Accuracy(Nodes[testnode].bestmodel,\
                             Xtest, ytest.cpu(), T)
@@ -535,7 +544,8 @@ def Evaluate_model(Nodes, Xtestori, ytestori):
     Xtestori = torch.Tensor(Xtestori)
     clsnum = max(ytestori) + 1
     # T = int(Xtestori.shape[1]/3)
-    T = 614 # hardcoded 614 for Peak Valley dataset
+    # T = 614 # hardcoded 614 for Peak Valley dataset
+    T = Xtestori.shape[1] # when passing single view data
     Nodes[0].Testidx = list(range(len(ytestori))) 
     Xpredclass = np.zeros(ytestori.shape)
     testnode = 0
