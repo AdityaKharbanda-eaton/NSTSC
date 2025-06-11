@@ -81,6 +81,59 @@ def Readdataset(dataset_path_, Dataset_name, standalize=True, val=False):
     
     return Xtrain, ytrain, Xval, yval, Xtest, ytest
 
+def Readdataset_single_view(dataset_path_, Dataset_name, standalize=True, val=False):
+    """
+    @brief Load and preprocess dataset from the given path.
+    @param dataset_path_: Path to the dataset directory.
+    @param Dataset_name: Name of the dataset.
+    @param standalize: Whether to standardize the data.
+    @param val: Whether to split validation from test set.
+    @return Xtrain, ytrain, Xval, yval, Xtest, ytest
+    """
+    
+    Dataset_folder = dataset_path_ + Dataset_name + '/'
+    Xtrain = pd.read_csv(Dataset_folder + Dataset_name + '_TRAIN.tsv', header=None, sep='\t').values
+    Xtest = pd.read_csv(Dataset_folder + Dataset_name + '_TEST.tsv', header=None, sep='\t').values
+    ytrain = Xtrain[:,0]
+    ytest = Xtest[:,0]
+    Xtrain = Xtrain[:,1:]
+    Xtest = Xtest[:,1:]
+    Xtrain, ytrain = Shuffle(Xtrain, ytrain)
+    Xtest, ytest = Shuffle(Xtest, ytest)
+    
+    Ntrain = Xtrain.shape[0]
+    Xall, yall = np.concatenate((Xtrain, Xtest)), np.concatenate((ytrain, ytest))
+        
+    yset = np.array(list(set(yall))).astype(int)
+    classnum = len(yset)    
+    for ci in range(classnum):
+        yall[yall == yset[ci]] = ci
+    
+    # ss = StandardScaler()
+    # if standalize:
+    #     Xall = ss.fit_transform(Xall)
+        
+    # Xall_fft = np.fft.fft(Xall)
+    # Xall_fft = np.abs(Xall_fft)
+    # Xall_dif = Xall[:,1:] - Xall[:,:-1]
+    # Xall_dif = np.concatenate((Xall_dif[:,0].reshape([-1,1]),Xall_dif),1)
+    # Xall = np.concatenate((Xall, Xall_fft, Xall_dif),1)
+    # if standalize:
+    #     Xall = ss.fit_transform(Xall)
+    Xtrain, Xtest = Xall[:Ntrain,:], Xall[Ntrain:,:] 
+    ytrain, ytest = yall[:Ntrain,], yall[Ntrain:,]
+    
+    if val:
+        Ntest = Xtest.shape[0]
+        Nval = int(Ntest * 0.5)
+        Xval, yval = Xtest[:Nval, :], ytest[:Nval,]
+        Xtest, ytest = Xtest[Nval:, :], ytest[Nval:,]
+    else:
+        Xval = Xtest - 0
+        yval = ytest - 0
+    
+    return Xtrain, ytrain, Xval, yval, Xtest, ytest
+
 # New function to load data without StandardScaler and without the data leakage issue
 def Readdataset2(dataset_path_, Dataset_name, normalize=True, val=False):
     """

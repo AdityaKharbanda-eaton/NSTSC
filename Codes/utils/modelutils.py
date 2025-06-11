@@ -1,5 +1,5 @@
 import torch
-from Models_node import TL_NN1, TL_NN2, TL_NN3, TL_NN4
+from Models_node_copy import TL_NN1, TL_NN2, TL_NN3, TL_NN4
 import os
 import pickle
 import numpy as np
@@ -311,37 +311,37 @@ def extract_key_features(model, view_names=["Original", "FFT", "Derivative"]):
     
     # Extract parameters
     t1 = model.t1.detach().numpy()
-    t2 = model.t2.detach().numpy()
-    t3 = model.t3.detach().numpy()
+    # t2 = model.t2.detach().numpy()
+    # t3 = model.t3.detach().numpy()
     b1 = model.b1.detach().numpy()
-    b2 = model.b2.detach().numpy()
-    b3 = model.b3.detach().numpy()
+    # b2 = model.b2.detach().numpy()
+    # b3 = model.b3.detach().numpy()
     
     #calculate threshold values
     u1 = b1/t1
-    u2 = b2/t2
-    u3 = b3/t3
+    # u2 = b2/t2
+    # u3 = b3/t3
 
     # Apply softmax on each view using torch.nn.functional
     A1 = F.softmax(model.A1, dim=1).detach().numpy()
-    A2 = F.softmax(model.A2, dim=1).detach().numpy()
-    A3 = F.softmax(model.A3, dim=1).detach().numpy()
+    # A2 = F.softmax(model.A2, dim=1).detach().numpy()
+    # A3 = F.softmax(model.A3, dim=1).detach().numpy()
 
     # Final aggregation weights using softmax
-    A4 = F.softmax(model.A4, dim=1).detach().numpy()
+    # A4 = F.softmax(model.A4, dim=1).detach().numpy()
     
     # Store parameters
     key_features = {
         view_names[0]: {"t": t1, "b": b1, "u": u1, "A": A1},
-        view_names[1]: {"t": t2, "b": b2, "u": u2, "A": A2},
-        view_names[2]: {"t": t3, "b": b3, "u": u3, "A": A3},
-        "agg": A4
+        # view_names[1]: {"t": t2, "b": b2, "u": u2, "A": A2},
+        # view_names[2]: {"t": t3, "b": b3, "u": u3, "A": A3},
+        # "agg": A4
     }
     
     # For each view, identify top K features by weight
     for view_name in view_names:
         weights = key_features[view_name]["A"]
-        top_indices = np.argsort(weights.flatten())[-20:]  # top 10 features
+        top_indices = np.argsort(weights.flatten())[::-1][:20]
         key_features[view_name]["top_indices"] = top_indices
     
     return key_features
