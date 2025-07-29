@@ -154,8 +154,8 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
     yori = torch.LongTensor(yori)
     yorit = torch.LongTensor(yorit)
     # N, T = len(yori), int(Xori.shape[1]/3)
-    # N, T = len(yori), 614 # hardcoded 614 for Peak Valley dataset
-    N,T = Xori.shape # when passing single view data
+    N, T = len(yori), 614 # hardcoded 614 for Peak Valley dataset
+    # N,T = Xori.shape # when passing single view data
     ginibest = 10
     Xori = torch.Tensor(Xori)
     Xorit = torch.Tensor(Xorit)
@@ -190,7 +190,8 @@ def Trainnode(Nodes, pronum, Epoch, lrt, X, y, Mdlnum, mdlpath, clsnum, Xt, yt):
                     # X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:2*T],\
                     #                       X_batch[:,2*T:])
                     # X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:T+10], X_batch[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
-                    X_rns[Ci] = tlnns[Ci](X_batch) # when passing single view data
+                    X_rns[Ci] = tlnns[Ci](X_batch[:,:T], X_batch[:,T:]) # when passing double view data
+                    # X_rns[Ci] = tlnns[Ci](X_batch) # when passing single view data
                     Losses[Ci] =  torch.sum(w_batch * (-y_batch * \
                                   torch.log(X_rns[Ci] + 1e-9) - (1-y_batch) * \
                                   torch.log(1-X_rns[Ci] + 1e-9)))
@@ -344,7 +345,8 @@ def Cptginisplit(mds, X, y, T, clsnum):
     for md in mds.values():
         # Xmd_preds = md(X[:,:T], X[:,T:2*T], X[:,2*T:])
         # Xmd_preds = md(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
-        Xmd_preds = md(X) # when passing single view data
+        Xmd_preds = md(X[:,:T], X[:,T:]) # when passing double view data
+        # Xmd_preds = md(X) # when passing single view data
         Xmd_predsrd = torch.round(Xmd_preds)
         onesnum = torch.sum(Xmd_predsrd == 1.)
         ygroup1 = y[Xmd_predsrd == 1.]
@@ -413,7 +415,8 @@ def Cpt_Accuracy(mdl, X, y, T):
     """
     # Xpreds = mdl(X[:,:T], X[:,T:2*T], X[:,2*T:])
     # Xpreds = mdl(X[:,:T], X[:,T:T+10], X[:,T+10:]) # hardcoded T + 10 for Peak Valley dataset
-    Xpreds = mdl(X) # when passing single view data
+    Xpreds = mdl(X[:,:T], X[:,T:]) # when passing double view data
+    # Xpreds = mdl(X) # when passing single view data
     Xpredsnp = Xpreds.detach().numpy()
     Xpnprd = np.round(Xpredsnp)
     trueidx = np.where(Xpnprd == 1)[0]
@@ -476,8 +479,8 @@ def Postprune(Nodes, Xtestori, ytestori):
     """
     Xtestori = torch.Tensor(Xtestori)
     # T = int(Xtestori.shape[1]/3)
-    # T = 614 # hardcoded 614 for Peak Valley dataset
-    T = Xtestori.shape[1] # when passing single view data
+    T = 614 # hardcoded 614 for Peak Valley dataset
+    # T = Xtestori.shape[1] # when passing single view data
     Nodes[0].Testidx = list(range(len(ytestori))) 
     Xpredclass = np.zeros(ytestori.shape)
     testnode = 0
@@ -494,7 +497,8 @@ def Postprune(Nodes, Xtestori, ytestori):
             # Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T],\
             #                 Xtest[:,T:2*T], Xtest[:, 2*T:]).cpu()
             # Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T], Xtest[:,T:T+10], Xtest[:, T+10:]).cpu() # hardcoded T + 10 for Peak Valley dataset
-            Preds_testnode = Nodes[testnode].bestmodel(Xtest).cpu() # when passing single view data
+            Preds_testnode = Nodes[testnode].bestmodel(Xtest[:,:T], Xtest[:,T:]).cpu() # when passing double view data
+            # Preds_testnode = Nodes[testnode].bestmodel(Xtest).cpu() # when passing single view data
             Predsnp = Preds_testnode.detach().numpy()
             Xpred, accutest, trueidx, falseidx = Cpt_Accuracy(Nodes[testnode].bestmodel,\
                             Xtest, ytest.cpu(), T)
@@ -543,8 +547,8 @@ def Evaluate_model(Nodes, Xtestori, ytestori):
     Xtestori = torch.Tensor(Xtestori)
     clsnum = max(ytestori) + 1
     # T = int(Xtestori.shape[1]/3)
-    # T = 614 # hardcoded 614 for Peak Valley dataset
-    T = Xtestori.shape[1] # when passing single view data
+    T = 614 # hardcoded 614 for Peak Valley dataset
+    # T = Xtestori.shape[1] # when passing single view data
     Nodes[0].Testidx = list(range(len(ytestori))) 
     Xpredclass = np.zeros(ytestori.shape)
     testnode = 0

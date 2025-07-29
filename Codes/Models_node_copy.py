@@ -29,25 +29,27 @@ class TL_NN1(nn.Module):
         self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t1_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
+        self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,10), requires_grad=True) #changed to 10 for Peak Valley Data
         # # self.t2_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t3_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         self.b1 = torch.nn.Parameter(torch.randn(1,T), requires_grad=True)
         # # self.b1_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.b2 = torch.nn.Parameter(torch.randn(1,T), requires_grad=True)
+        self.b2 = torch.nn.Parameter(torch.randn(1,10), requires_grad=True) #changed to 10 for Peak Valley Data
         # # self.b2_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.b3 = torch.nn.Parameter(torch.randn(1,T), requires_grad=True)
         # self.b3_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         self.A1 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        # self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
+        self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
         # self.A3 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        # self.A4 = torch.nn.Parameter(torch.rand(1,3),requires_grad=True)
+        self.A4 = torch.nn.Parameter(torch.rand(1,2),requires_grad=True)
         self.beta1 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
         # self.beta3 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
 
-    def forward(self,x1):
+    def forward(self,x1, x2):
         """
         @brief Forward pass of the TL_NN1 module.
         @param x1 First input tensor.
@@ -63,12 +65,12 @@ class TL_NN1(nn.Module):
         self.weightbias1 = self.beta1 - torch.sum(self.A_sm1 * (1 - self.r_asgm1), 1)
         self.activate1 = clamp(self.weightbias1).reshape([-1,1])
         
-        # #Spectral code
-        # self.r_a2 = x2 * self.t2 - self.b2
-        # self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
-        # self.A_sm2 =  F.softmax(self.A2, dim = 1)
-        # self.weightbias2 = self.beta2 - torch.sum(self.A_sm2 * (1 - self.r_asgm2), 1)
-        # self.activate2 = clamp(self.weightbias2).reshape([-1,1])
+        #Spectral code
+        self.r_a2 = x2 * self.t2 - self.b2
+        self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
+        self.A_sm2 =  F.softmax(self.A2, dim = 1)
+        self.weightbias2 = self.beta2 - torch.sum(self.A_sm2 * (1 - self.r_asgm2), 1)
+        self.activate2 = clamp(self.weightbias2).reshape([-1,1])
         
         # #Derivative code
         # self.r_a3 = x3 * self.t3 - self.b3
@@ -77,12 +79,12 @@ class TL_NN1(nn.Module):
         # self.weightbias3 = self.beta3 - torch.sum(self.A_sm3 * (1 - self.r_asgm3), 1)
         # self.activate3 = clamp(self.weightbias3).reshape([-1,1])
         
-        # self.r_asgm4 = torch.cat((self.activate1, self.activate2, self.activate3),1)
-        # self.A_sm4 = F.softmax(self.A4, dim = 1)
-        # self.weightbias4 = self.beta4 - torch.sum(self.A_sm4 * (1 - self.r_asgm4), 1)
-        # self.activate4 = clamp(self.weightbias4).reshape([-1])
+        self.r_asgm4 = torch.cat((self.activate1, self.activate2),1)
+        self.A_sm4 = F.softmax(self.A4, dim = 1)
+        self.weightbias4 = self.beta4 - torch.sum(self.A_sm4 * (1 - self.r_asgm4), 1)
+        self.activate4 = clamp(self.weightbias4).reshape([-1])
         
-        return self.activate1.reshape([-1])
+        return self.activate4.reshape([-1])
 
 # disjunction of different predicates
 class TL_NN2(nn.Module):
@@ -99,25 +101,27 @@ class TL_NN2(nn.Module):
         self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t1_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
+        self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,10), requires_grad=True) #changed to 10 for Peak Valley Data
         # # self.t2_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.t3_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         self.b1 = torch.nn.Parameter(torch.randn(1,T), requires_grad=True)
         # self.b1_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.b2 = torch.nn.Parameter(torch.randn(1,T), requires_grad=True)
+        self.b2 = torch.nn.Parameter(torch.randn(1,10), requires_grad=True) #changed to 10 for Peak Valley Data
         # # self.b2_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         # self.b3 = torch.nn.Parameter(torch.randn(1,T), requires_grad=True)
         # self.b3_2 = torch.nn.Parameter(1e-5*torch.randn(1,T), requires_grad=True)
         self.A1 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        # self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
+        self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
         # self.A3 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        # self.A4 = torch.nn.Parameter(torch.rand(1,3),requires_grad=True)
+        self.A4 = torch.nn.Parameter(torch.rand(1,2),requires_grad=True)
         self.beta1 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
         # self.beta3 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
 
-    def forward(self,x1):
+    def forward(self,x1, x2):
         """
         @brief Forward pass of the TL_NN2 module.
         @param x1 First input tensor.
@@ -131,11 +135,11 @@ class TL_NN2(nn.Module):
         self.weightbias1 = 1-self.beta1 + torch.sum(self.A_sm1 * (self.r_asgm1), 1)
         self.activate1 = clamp(self.weightbias1).reshape([-1,1])
         
-        # self.r_a2 = x2 * self.t2 - self.b2
-        # self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
-        # self.A_sm2 =  F.softmax(self.A2, dim = 1)
-        # self.weightbias2 = 1-self.beta2 + torch.sum(self.A_sm2 * (self.r_asgm2), 1)
-        # self.activate2 = clamp(self.weightbias2).reshape([-1,1])
+        self.r_a2 = x2 * self.t2 - self.b2
+        self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
+        self.A_sm2 =  F.softmax(self.A2, dim = 1)
+        self.weightbias2 = 1-self.beta2 + torch.sum(self.A_sm2 * (self.r_asgm2), 1)
+        self.activate2 = clamp(self.weightbias2).reshape([-1,1])
         
         # self.r_a3 = x3 * self.t3 - self.b3
         # self.r_asgm3 = torch.sigmoid(self.r_a3) # convert to 0-1 range
@@ -143,12 +147,12 @@ class TL_NN2(nn.Module):
         # self.weightbias3 = 1-self.beta3 + torch.sum(self.A_sm3 * (self.r_asgm3), 1)
         # self.activate3 = clamp(self.weightbias3).reshape([-1,1])
         
-        # self.r_asgm4 = torch.cat((self.activate1, self.activate2, self.activate3),1)
-        # self.A_sm4 = F.softmax(self.A4, dim = 1)
-        # self.weightbias4 = 1 - self.beta4 + torch.sum(self.A_sm4 * (self.r_asgm4), 1)
-        # self.activate4 = clamp(self.weightbias4).reshape([-1])
+        self.r_asgm4 = torch.cat((self.activate1, self.activate2),1)
+        self.A_sm4 = F.softmax(self.A4, dim = 1)
+        self.weightbias4 = 1 - self.beta4 + torch.sum(self.A_sm4 * (self.r_asgm4), 1)
+        self.activate4 = clamp(self.weightbias4).reshape([-1])
         
-        return self.activate1.reshape([-1])
+        return self.activate4.reshape([-1])
 
 # Always one predicate
 class TL_NN3(nn.Module):
@@ -164,22 +168,22 @@ class TL_NN3(nn.Module):
         super(TL_NN3,self).__init__()
         self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t1_2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-        # self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # # self.t2_2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t3_2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         self.b1 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
-        # self.b2 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
+        self.b2 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         # self.b3 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         self.A1 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
         # self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        # self.A2 = torch.nn.Parameter(torch.rand(1,10),requires_grad=True) # changed to 10 for Peak Valley data
+        self.A2 = torch.nn.Parameter(torch.rand(1,10),requires_grad=True) # changed to 10 for Peak Valley data
         # self.A3 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        # self.A4 = torch.nn.Parameter(torch.rand(1,3),requires_grad=True)
+        self.A4 = torch.nn.Parameter(torch.rand(1,2),requires_grad=True)
         self.beta1 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
         # self.beta3 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
 
     def forward(self,x1):
         """
@@ -195,11 +199,11 @@ class TL_NN3(nn.Module):
         self.weightbias1 = self.beta1 - torch.sum(self.A_sm1 * (1 - self.r_asgm1), 1)
         self.activate1 = clamp(self.weightbias1).reshape([-1,1])
         
-        # self.r_a2 = x2 * self.t2 - self.b2
-        # self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
-        # self.A_sm2 =  F.softmax(self.A2, dim = 1)
-        # self.weightbias2 = self.beta2 - torch.sum(self.A_sm2 * (1 - self.r_asgm2), 1)
-        # self.activate2 = clamp(self.weightbias2).reshape([-1,1])
+        self.r_a2 = x2 * self.t2 - self.b2
+        self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
+        self.A_sm2 =  F.softmax(self.A2, dim = 1)
+        self.weightbias2 = self.beta2 - torch.sum(self.A_sm2 * (1 - self.r_asgm2), 1)
+        self.activate2 = clamp(self.weightbias2).reshape([-1,1])
         
         # self.r_a3 = x3 * self.t3 - self.b3
         # self.r_asgm3 = torch.sigmoid(self.r_a3) # convert to 0-1 range
@@ -207,12 +211,12 @@ class TL_NN3(nn.Module):
         # self.weightbias3 = self.beta3 - torch.sum(self.A_sm3 * (1 - self.r_asgm3), 1)
         # self.activate3 = clamp(self.weightbias3).reshape([-1,1])
         
-        # self.r_asgm4 = torch.cat((self.activate1, self.activate2, self.activate3),1)
-        # self.A_sm4 = F.softmax(self.A4, dim = 1)
-        # self.weightbias4 = self.beta4 - torch.sum(self.A_sm4 * (1 - self.r_asgm4), 1)
-        # self.activate4 = clamp(self.weightbias4).reshape([-1])
+        self.r_asgm4 = torch.cat((self.activate1, self.activate2),1)
+        self.A_sm4 = F.softmax(self.A4, dim = 1)
+        self.weightbias4 = self.beta4 - torch.sum(self.A_sm4 * (1 - self.r_asgm4), 1)
+        self.activate4 = clamp(self.weightbias4).reshape([-1])
         
-        return self.activate1.reshape([-1])
+        return self.activate4.reshape([-1])
 
 # Eventually one predicate
 class TL_NN4(nn.Module):
@@ -229,24 +233,24 @@ class TL_NN4(nn.Module):
         self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t1_2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t1_3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-        # self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # # self.t2_2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # # self.t2_3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t3_2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         # self.t3_3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
         self.b1 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
-        # self.b2 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
+        self.b2 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         # self.b3 = torch.nn.Parameter(torch.randn(1,1), requires_grad=True)
         self.A1 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
         # self.A2 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
-        # self.A2 = torch.nn.Parameter(torch.rand(1,10),requires_grad=True) # changed to 10 for Peak Valley data
+        self.A2 = torch.nn.Parameter(torch.rand(1,10),requires_grad=True) # changed to 10 for Peak Valley data
         # self.A3 = torch.nn.Parameter(torch.rand(1,T),requires_grad=True)
         # self.A4 = torch.nn.Parameter(torch.rand(1,3),requires_grad=True)
         self.beta1 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta2 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
         # self.beta3 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
-        # self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
+        self.beta4 = torch.nn.Parameter(torch.tensor(1.),requires_grad=True)
 
     def forward(self,x1):
         """
@@ -262,11 +266,11 @@ class TL_NN4(nn.Module):
         self.weightbias1 = 1-self.beta1 + torch.sum(self.A_sm1 * (self.r_asgm1), 1)
         self.activate1 = clamp(self.weightbias1).reshape([-1,1])
         
-        # self.r_a2 = x2 * self.t2 - self.b2
-        # self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
-        # self.A_sm2 =  F.softmax(self.A2, dim = 1)
-        # self.weightbias2 = 1-self.beta2 + torch.sum(self.A_sm2 * (self.r_asgm2), 1)
-        # self.activate2 = clamp(self.weightbias2).reshape([-1,1])
+        self.r_a2 = x2 * self.t2 - self.b2
+        self.r_asgm2 = torch.sigmoid(self.r_a2) # convert to 0-1 range
+        self.A_sm2 =  F.softmax(self.A2, dim = 1)
+        self.weightbias2 = 1-self.beta2 + torch.sum(self.A_sm2 * (self.r_asgm2), 1)
+        self.activate2 = clamp(self.weightbias2).reshape([-1,1])
         
         # self.r_a3 = x3 * self.t3 - self.b3
         # self.r_asgm3 = torch.sigmoid(self.r_a3) # convert to 0-1 range
@@ -274,12 +278,12 @@ class TL_NN4(nn.Module):
         # self.weightbias3 = 1-self.beta3 + torch.sum(self.A_sm3 * (self.r_asgm3), 1)
         # self.activate3 = clamp(self.weightbias3).reshape([-1,1])
         
-        # self.r_asgm4 = torch.cat((self.activate1, self.activate2, self.activate3),1)
-        # self.A_sm4 = F.softmax(self.A4, dim = 1)
-        # self.weightbias4 = 1-self.beta4 + torch.sum(self.A_sm4 * (self.r_asgm4), 1)
-        # self.activate4 = clamp(self.weightbias4).reshape([-1])
+        self.r_asgm4 = torch.cat((self.activate1, self.activate2),1)
+        self.A_sm4 = F.softmax(self.A4, dim = 1)
+        self.weightbias4 = 1-self.beta4 + torch.sum(self.A_sm4 * (self.r_asgm4), 1)
+        self.activate4 = clamp(self.weightbias4).reshape([-1])
         
-        return self.activate1.reshape([-1])
+        return self.activate4.reshape([-1])
 
 # always eventually one predicate
 # class TL_NN5(nn.Module):
