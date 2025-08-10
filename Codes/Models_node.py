@@ -280,205 +280,205 @@ class TL_NN4(nn.Module):
         return self.activate4.reshape([-1])
 
 # always eventually one predicate
-# class TL_NN5(nn.Module):
-#     """
-#     @class TL_NN5
-#     @brief Neural network for always-eventually one predicate (Globally-Finally operator).
-#     """
-#     def __init__(self, T):
-#         """
-#         @brief Initializes the TL_NN5 module.
-#         @param T Number of time steps.
-#         """
-#         super(TL_NN5,self).__init__()
-#         self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.b1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.A1_1 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
-#         self.beta1_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.beta1_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.A2_1 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
-#         self.T = T
+class TL_NN5(nn.Module):
+    """
+    @class TL_NN5
+    @brief Neural network for always-eventually one predicate (Globally-Finally operator).
+    """
+    def __init__(self, T):
+        """
+        @brief Initializes the TL_NN5 module.
+        @param T Number of time steps.
+        """
+        super(TL_NN5,self).__init__()
+        self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.b1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.A1_1 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
+        self.beta1_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.beta1_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.A2_1 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
+        self.T = T
         
-#         self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.b2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.A1_2 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
-#         self.A2_2 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
-#         self.beta2_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.beta2_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.b2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.A1_2 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
+        self.A2_2 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
+        self.beta2_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.beta2_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
         
-#         self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.b3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.A1_3 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
-#         self.A2_3 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
-#         self.beta3_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.beta3_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.b3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.A1_3 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
+        self.A2_3 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
+        self.beta3_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.beta3_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
         
-#         self.A4 = torch.nn.Parameter(torch.rand((1,3),requires_grad=True))
-#         self.beta4 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.A4 = torch.nn.Parameter(torch.rand((1,3),requires_grad=True))
+        self.beta4 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
 
-#     def forward(self,x1, x2, x3):
-#         """
-#         @brief Forward pass of the TL_NN5 module.
-#         @param x1 First input tensor.
-#         @param x2 Second input tensor.
-#         @param x3 Third input tensor.
-#         @return Output tensor.
-#         """
-#         x1 = Preprocess(x1, self.T, self.T)
-#         r_a1_1 =  (self.b1 - x1 * self.t1)
-#         b1pos = torch.where(r_a1_1 == self.b1)
-#         r_a1_1[r_a1_1 == self.b1] = -10
-#         self.r_a1_1 = r_a1_1
-#         self.r_asgm1_1 = torch.sigmoid(self.r_a1_1) # convert to 0-1 range
-#         self.A1_1sm =  F.softmax(self.A1_1, dim = 2)         
-#         self.weightbias1_1 = 1-self.beta1_1 + torch.sum(self.A1_1sm * (self.r_asgm1_1), 2)
-#         self.activate1_1 = torch.max(torch.zeros(1).to(device), \
-#                                       torch.min(torch.ones(1).to(device),self.weightbias1_1)).reshape([-1,self.T])         
-#         self.ra2_1 = self.activate1_1
-#         self.A2_1sm =  F.softmax(self.A2_1, dim = 1)        
-#         self.weightbias2_1 = self.beta1_2 - torch.sum(self.A2_1sm * (1-self.ra2_1), 1)
-#         self.xrtn2_1 = torch.max(torch.zeros_like(self.weightbias2_1), \
-#                         torch.min(torch.ones_like(self.weightbias2_1),self.weightbias2_1)).reshape([-1,1])
+    def forward(self,x1, x2, x3):
+        """
+        @brief Forward pass of the TL_NN5 module.
+        @param x1 First input tensor.
+        @param x2 Second input tensor.
+        @param x3 Third input tensor.
+        @return Output tensor.
+        """
+        x1 = Preprocess(x1, self.T, self.T)
+        r_a1_1 =  (self.b1 - x1 * self.t1)
+        b1pos = torch.where(r_a1_1 == self.b1)
+        r_a1_1[r_a1_1 == self.b1] = -10
+        self.r_a1_1 = r_a1_1
+        self.r_asgm1_1 = torch.sigmoid(self.r_a1_1) # convert to 0-1 range
+        self.A1_1sm =  F.softmax(self.A1_1, dim = 2)         
+        self.weightbias1_1 = 1-self.beta1_1 + torch.sum(self.A1_1sm * (self.r_asgm1_1), 2)
+        self.activate1_1 = torch.max(torch.zeros(1).to(device), \
+                                      torch.min(torch.ones(1).to(device),self.weightbias1_1)).reshape([-1,self.T])         
+        self.ra2_1 = self.activate1_1
+        self.A2_1sm =  F.softmax(self.A2_1, dim = 1)        
+        self.weightbias2_1 = self.beta1_2 - torch.sum(self.A2_1sm * (1-self.ra2_1), 1)
+        self.xrtn2_1 = torch.max(torch.zeros_like(self.weightbias2_1), \
+                        torch.min(torch.ones_like(self.weightbias2_1),self.weightbias2_1)).reshape([-1,1])
         
-#         x2 = Preprocess(x2, self.T, self.T)
-#         r_a1_2 =  (self.b2 - x2 * self.t2)
-#         b2pos = torch.where(r_a1_2 == self.b2)
-#         r_a1_2[b2pos] = -10
-#         self.r_a1_2 = r_a1_2
-#         self.r_asgm1_2 = torch.sigmoid(self.r_a1_2) # convert to 0-1 range
-#         self.A1_2sm =  F.softmax(self.A1_2, dim = 2)         
-#         self.weightbias1_2 = 1-self.beta2_1 + torch.sum(self.A1_2sm * (self.r_asgm1_2), 2)
-#         self.activate1_2 = torch.max(torch.zeros_like(self.weightbias1_2), \
-#                                       torch.min(torch.ones_like(self.weightbias1_2),self.weightbias1_2)).reshape([-1,self.T])         
-#         self.ra2_2 = self.activate1_2
-#         self.A2_2sm =  F.softmax(self.A2_2, dim = 1)        
-#         self.weightbias2_2 = self.beta2_2 - torch.sum(self.A2_2sm * (1-self.ra2_2), 1)
-#         self.xrtn2_2 = torch.max(torch.zeros_like(self.weightbias2_2), \
-#                         torch.min(torch.ones_like(self.weightbias2_2),self.weightbias2_2)).reshape([-1,1])
+        x2 = Preprocess(x2, self.T, self.T)
+        r_a1_2 =  (self.b2 - x2 * self.t2)
+        b2pos = torch.where(r_a1_2 == self.b2)
+        r_a1_2[b2pos] = -10
+        self.r_a1_2 = r_a1_2
+        self.r_asgm1_2 = torch.sigmoid(self.r_a1_2) # convert to 0-1 range
+        self.A1_2sm =  F.softmax(self.A1_2, dim = 2)         
+        self.weightbias1_2 = 1-self.beta2_1 + torch.sum(self.A1_2sm * (self.r_asgm1_2), 2)
+        self.activate1_2 = torch.max(torch.zeros_like(self.weightbias1_2), \
+                                      torch.min(torch.ones_like(self.weightbias1_2),self.weightbias1_2)).reshape([-1,self.T])         
+        self.ra2_2 = self.activate1_2
+        self.A2_2sm =  F.softmax(self.A2_2, dim = 1)        
+        self.weightbias2_2 = self.beta2_2 - torch.sum(self.A2_2sm * (1-self.ra2_2), 1)
+        self.xrtn2_2 = torch.max(torch.zeros_like(self.weightbias2_2), \
+                        torch.min(torch.ones_like(self.weightbias2_2),self.weightbias2_2)).reshape([-1,1])
         
-#         x3 = Preprocess(x3, self.T, self.T)
-#         r_a1_3 =  (self.b3 - x3 * self.t3)
-#         b3pos = torch.where(r_a1_3 == self.b3)
-#         r_a1_3[b3pos] = -10
-#         self.r_a1_3 = r_a1_3
-#         self.r_asgm1_3 = torch.sigmoid(self.r_a1_3) # convert to 0-1 range
-#         self.A1_3sm =  F.softmax(self.A1_3, dim = 2)         
-#         self.weightbias1_3 = 1-self.beta3_1 + torch.sum(self.A1_3sm * (self.r_asgm1_3), 2)
-#         self.activate1_3 = torch.max(torch.zeros_like(self.weightbias1_3), \
-#                             torch.min(torch.ones_like(self.weightbias1_3),self.weightbias1_3)).reshape([-1,self.T])         
-#         self.ra2_3 = self.activate1_3
-#         self.A2_3sm =  F.softmax(self.A2_3, dim = 1)        
-#         self.weightbias2_3 = self.beta3_2 - torch.sum(self.A2_3sm * (1-self.ra2_3), 1)
-#         self.xrtn2_3 = torch.max(torch.zeros_like(self.weightbias2_3), \
-#                         torch.min(torch.ones_like(self.weightbias2_3),self.weightbias2_3)).reshape([-1,1])
+        x3 = Preprocess(x3, self.T, self.T)
+        r_a1_3 =  (self.b3 - x3 * self.t3)
+        b3pos = torch.where(r_a1_3 == self.b3)
+        r_a1_3[b3pos] = -10
+        self.r_a1_3 = r_a1_3
+        self.r_asgm1_3 = torch.sigmoid(self.r_a1_3) # convert to 0-1 range
+        self.A1_3sm =  F.softmax(self.A1_3, dim = 2)         
+        self.weightbias1_3 = 1-self.beta3_1 + torch.sum(self.A1_3sm * (self.r_asgm1_3), 2)
+        self.activate1_3 = torch.max(torch.zeros_like(self.weightbias1_3), \
+                            torch.min(torch.ones_like(self.weightbias1_3),self.weightbias1_3)).reshape([-1,self.T])         
+        self.ra2_3 = self.activate1_3
+        self.A2_3sm =  F.softmax(self.A2_3, dim = 1)        
+        self.weightbias2_3 = self.beta3_2 - torch.sum(self.A2_3sm * (1-self.ra2_3), 1)
+        self.xrtn2_3 = torch.max(torch.zeros_like(self.weightbias2_3), \
+                        torch.min(torch.ones_like(self.weightbias2_3),self.weightbias2_3)).reshape([-1,1])
         
-#         self.xrtn123 = torch.cat((self.xrtn2_1, self.xrtn2_2, self.xrtn2_3),1)
-#         self.A4_sm =  F.softmax(self.A4, dim = 1)        
-#         self.weightbias4 = self.beta4 - torch.sum(self.A4_sm * (1-self.xrtn123), 1)
-#         self.xrtn4 = torch.max(torch.zeros_like(self.weightbias4), \
-#                         torch.min(torch.ones_like(self.weightbias4),self.weightbias4)).reshape([-1])
+        self.xrtn123 = torch.cat((self.xrtn2_1, self.xrtn2_2, self.xrtn2_3),1)
+        self.A4_sm =  F.softmax(self.A4, dim = 1)        
+        self.weightbias4 = self.beta4 - torch.sum(self.A4_sm * (1-self.xrtn123), 1)
+        self.xrtn4 = torch.max(torch.zeros_like(self.weightbias4), \
+                        torch.min(torch.ones_like(self.weightbias4),self.weightbias4)).reshape([-1])
         
-#         return self.xrtn4
+        return self.xrtn4
 
-# # eventually always one predicate
-# class TL_NN6(nn.Module):
-#     """
-#     @class TL_NN6
-#     @brief Neural network for eventually-always one predicate (Finally-Globally operator).
-#     """
-#     def __init__(self, T):
-#         """
-#         @brief Initializes the TL_NN6 module.
-#         @param T Number of time steps.
-#         """
-#         super(TL_NN6,self).__init__()
-#         self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.b1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.A1_1 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
-#         self.beta1_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.beta1_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.A2_1 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
-#         self.T = T
+# eventually always one predicate
+class TL_NN6(nn.Module):
+    """
+    @class TL_NN6
+    @brief Neural network for eventually-always one predicate (Finally-Globally operator).
+    """
+    def __init__(self, T):
+        """
+        @brief Initializes the TL_NN6 module.
+        @param T Number of time steps.
+        """
+        super(TL_NN6,self).__init__()
+        self.t1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.b1 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.A1_1 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
+        self.beta1_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.beta1_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.A2_1 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
+        self.T = T
         
-#         self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.b2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.A1_2 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
-#         self.A2_2 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
-#         self.beta2_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.beta2_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.t2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.b2 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.A1_2 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
+        self.A2_2 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
+        self.beta2_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.beta2_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
         
-#         self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.b3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
-#         self.A1_3 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
-#         self.A2_3 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
-#         self.beta3_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
-#         self.beta3_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.t3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.b3 = torch.nn.Parameter(1e-5*torch.randn(1,1), requires_grad=True)
+        self.A1_3 = torch.nn.Parameter(torch.rand(1,1,T),requires_grad=True)
+        self.A2_3 = torch.nn.Parameter(torch.rand((1,T),requires_grad=True))
+        self.beta3_1 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.beta3_2 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
         
-#         self.A4 = torch.nn.Parameter(torch.rand((1,3),requires_grad=True))
-#         self.beta4 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
+        self.A4 = torch.nn.Parameter(torch.rand((1,3),requires_grad=True))
+        self.beta4 = torch.nn.Parameter(torch.tensor(1.), requires_grad=True)
         
-#     def forward(self,x1, x2, x3):
-#         # first layer for always
-#          x1 = Preprocess(x1, self.T, self.T)
-#          r_a1_1 =  (self.b1 - x1 * self.t1)
-#          b1pos = torch.where(r_a1_1 == self.b1)
-#          r_a1_1[b1pos] = 10
-#          self.r_a1_1 = r_a1_1
-#          self.r_asgm1_1 = torch.sigmoid(self.r_a1_1) # convert to 0-1 range
-#          self.A1_1sm =  F.softmax(self.A1_1, dim = 2)         
-#          self.weightbias1_1 = self.beta1_1 - torch.sum(self.A1_1sm * (1-self.r_asgm1_1), 2)
-#          self.activate1_1 = torch.max(torch.zeros_like(self.weightbias1_1), \
-#                         torch.min(torch.ones_like(self.weightbias1_1),self.weightbias1_1)).reshape([-1,self.T])         
-#          # second layer for eventually
-#          self.ra2_1 = self.activate1_1
-#          self.A2_1sm =  F.softmax(self.A2_1, dim = 1)        
-#          self.weightbias2_1 = 1 - self.beta2_1 + torch.sum(self.A2_1sm * (self.ra2_1), 1)
-#          self.xrtn2_1 = torch.max(torch.zeros_like(self.weightbias2_1), \
-#                                   torch.min(torch.ones_like(self.weightbias2_1),self.weightbias2_1)).reshape([-1, 1])
+    def forward(self,x1, x2, x3):
+        # first layer for always
+         x1 = Preprocess(x1, self.T, self.T)
+         r_a1_1 =  (self.b1 - x1 * self.t1)
+         b1pos = torch.where(r_a1_1 == self.b1)
+         r_a1_1[b1pos] = 10
+         self.r_a1_1 = r_a1_1
+         self.r_asgm1_1 = torch.sigmoid(self.r_a1_1) # convert to 0-1 range
+         self.A1_1sm =  F.softmax(self.A1_1, dim = 2)         
+         self.weightbias1_1 = self.beta1_1 - torch.sum(self.A1_1sm * (1-self.r_asgm1_1), 2)
+         self.activate1_1 = torch.max(torch.zeros_like(self.weightbias1_1), \
+                        torch.min(torch.ones_like(self.weightbias1_1),self.weightbias1_1)).reshape([-1,self.T])         
+         # second layer for eventually
+         self.ra2_1 = self.activate1_1
+         self.A2_1sm =  F.softmax(self.A2_1, dim = 1)        
+         self.weightbias2_1 = 1 - self.beta2_1 + torch.sum(self.A2_1sm * (self.ra2_1), 1)
+         self.xrtn2_1 = torch.max(torch.zeros_like(self.weightbias2_1), \
+                                  torch.min(torch.ones_like(self.weightbias2_1),self.weightbias2_1)).reshape([-1, 1])
          
         
-#          x2 = Preprocess(x2, self.T, self.T)
-#          r_a1_2 =  (self.b2 - x2 * self.t2)
-#          b2pos = torch.where(r_a1_2 == self.b2)
-#          r_a1_2[b2pos] = 10
-#          self.r_a1_2 = r_a1_2
-#          self.r_asgm1_2 = torch.sigmoid(self.r_a1_2) # convert to 0-1 range
-#          self.A1_2sm =  F.softmax(self.A1_2, dim = 2)         
-#          self.weightbias1_2 = self.beta2_1 - torch.sum(self.A1_2sm * (1-self.r_asgm1_2), 2)
-#          self.activate1_2 = torch.max(torch.zeros_like(self.weightbias1_2), \
-#                         torch.min(torch.ones_like(self.weightbias1_2),self.weightbias1_2)).reshape([-1,self.T])         
-#          # second layer for eventually
-#          self.ra2_2 = self.activate1_2
-#          self.A2_2sm =  F.softmax(self.A2_2, dim = 1)        
-#          self.weightbias2_2 = 1 - self.beta2_2 + torch.sum(self.A2_2sm * (self.ra2_2), 1)
-#          self.xrtn2_2 = torch.max(torch.zeros_like(self.weightbias2_2), \
-#                         torch.min(torch.ones_like(self.weightbias2_2),self.weightbias2_2)).reshape([-1,1])
+         x2 = Preprocess(x2, self.T, self.T)
+         r_a1_2 =  (self.b2 - x2 * self.t2)
+         b2pos = torch.where(r_a1_2 == self.b2)
+         r_a1_2[b2pos] = 10
+         self.r_a1_2 = r_a1_2
+         self.r_asgm1_2 = torch.sigmoid(self.r_a1_2) # convert to 0-1 range
+         self.A1_2sm =  F.softmax(self.A1_2, dim = 2)         
+         self.weightbias1_2 = self.beta2_1 - torch.sum(self.A1_2sm * (1-self.r_asgm1_2), 2)
+         self.activate1_2 = torch.max(torch.zeros_like(self.weightbias1_2), \
+                        torch.min(torch.ones_like(self.weightbias1_2),self.weightbias1_2)).reshape([-1,self.T])         
+         # second layer for eventually
+         self.ra2_2 = self.activate1_2
+         self.A2_2sm =  F.softmax(self.A2_2, dim = 1)        
+         self.weightbias2_2 = 1 - self.beta2_2 + torch.sum(self.A2_2sm * (self.ra2_2), 1)
+         self.xrtn2_2 = torch.max(torch.zeros_like(self.weightbias2_2), \
+                        torch.min(torch.ones_like(self.weightbias2_2),self.weightbias2_2)).reshape([-1,1])
         
         
-#          x3 = Preprocess(x3, self.T, self.T)
-#          r_a1_3 =  (self.b3 - x3 * self.t3)
-#          b3pos = torch.where(r_a1_3 == self.b3)
-#          r_a1_3[b3pos] = 10
-#          self.r_a1_3 = r_a1_3
-#          self.r_asgm1_3 = torch.sigmoid(self.r_a1_3) # convert to 0-1 range
-#          self.A1_3sm =  F.softmax(self.A1_3, dim = 2)         
-#          self.weightbias1_3 = self.beta3_1 - torch.sum(self.A1_3sm * (1-self.r_asgm1_3), 2)
-#          self.activate1_3 = torch.max(torch.zeros_like(self.weightbias1_3), \
-#                             torch.min(torch.ones_like(self.weightbias1_3),self.weightbias1_3)).reshape([-1,self.T])         
-#          # second layer for always
-#          self.ra2_3 = self.activate1_3
-#          self.A2_3sm =  F.softmax(self.A2_3, dim = 1)        
-#          self.weightbias2_3 = 1 - self.beta3_2 + torch.sum(self.A2_3sm * (self.ra2_3), 1)
-#          self.xrtn2_3 = torch.max(torch.zeros_like(self.weightbias2_3), \
-#                         torch.min(torch.ones_like(self.weightbias2_3),self.weightbias2_3)).reshape([-1,1])
+         x3 = Preprocess(x3, self.T, self.T)
+         r_a1_3 =  (self.b3 - x3 * self.t3)
+         b3pos = torch.where(r_a1_3 == self.b3)
+         r_a1_3[b3pos] = 10
+         self.r_a1_3 = r_a1_3
+         self.r_asgm1_3 = torch.sigmoid(self.r_a1_3) # convert to 0-1 range
+         self.A1_3sm =  F.softmax(self.A1_3, dim = 2)         
+         self.weightbias1_3 = self.beta3_1 - torch.sum(self.A1_3sm * (1-self.r_asgm1_3), 2)
+         self.activate1_3 = torch.max(torch.zeros_like(self.weightbias1_3), \
+                            torch.min(torch.ones_like(self.weightbias1_3),self.weightbias1_3)).reshape([-1,self.T])         
+         # second layer for always
+         self.ra2_3 = self.activate1_3
+         self.A2_3sm =  F.softmax(self.A2_3, dim = 1)        
+         self.weightbias2_3 = 1 - self.beta3_2 + torch.sum(self.A2_3sm * (self.ra2_3), 1)
+         self.xrtn2_3 = torch.max(torch.zeros_like(self.weightbias2_3), \
+                        torch.min(torch.ones_like(self.weightbias2_3),self.weightbias2_3)).reshape([-1,1])
         
-#          self.xrtn123 = torch.cat((self.xrtn2_1, self.xrtn2_2, self.xrtn2_3),1)
-#          self.A4_sm =  F.softmax(self.A4, dim = 1)        
-#          self.weightbias4 = self.beta4 - torch.sum(self.A4_sm * (1-self.xrtn123), 1)
-#          self.xrtn4 = torch.max(torch.zeros_like(self.weightbias4), \
-#                         torch.min(torch.ones_like(self.weightbias4),self.weightbias4)).reshape([-1])
+         self.xrtn123 = torch.cat((self.xrtn2_1, self.xrtn2_2, self.xrtn2_3),1)
+         self.A4_sm =  F.softmax(self.A4, dim = 1)        
+         self.weightbias4 = self.beta4 - torch.sum(self.A4_sm * (1-self.xrtn123), 1)
+         self.xrtn4 = torch.max(torch.zeros_like(self.weightbias4), \
+                        torch.min(torch.ones_like(self.weightbias4),self.weightbias4)).reshape([-1])
                   
-#          return self.xrtn4
+         return self.xrtn4
 
 
 def Preprocess(x, T1, T2):

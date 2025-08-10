@@ -28,7 +28,7 @@ def main():
     # Xtrain_raw, ytrain_raw, Xval_raw, yval_raw, Xtest_raw, ytest_raw = Readdataset(dataset_path_, Dataset_name)
     # Xtrain, Xval, Xtest = Multi_view(Xtrain_raw, Xval_raw, Xtest_raw)
     start_time = time.time()
-    Xtrain, ytrain, Xval, yval, Xtest, ytest = Readdataset(dataset_path_, Dataset_name)
+    Xtrain, ytrain, Xval, yval, Xtest, ytest = Readdataset(dataset_path_, Dataset_name, standalize = False)
     N, T = calculate_dataset_metrics(Xtrain)
     end_time = time.time()
     export_file_path = f"../Preprocessed_data/{Dataset_name}_data.pkl"

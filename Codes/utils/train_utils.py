@@ -90,8 +90,8 @@ def Build_tree(Xtrain, Xval, ytrain_raw, yval_raw, Epoch, classnum, learnrate, s
     Tree = {}
     pronodenum = 0
     maxnodenum = 0
-    # Modelnum = 7
-    Modelnum = 5 # commented TL_NN5 and TL_NN6 from Models_node.py
+    Modelnum = 7
+    # Modelnum = 5 # commented TL_NN5 and TL_NN6 from Models_node.py
     bstaccu = 0
     Tree[maxnodenum] = Node(maxnodenum)
     Tree[pronodenum].stoptrain = False
